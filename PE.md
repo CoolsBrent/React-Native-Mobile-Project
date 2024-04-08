@@ -47,6 +47,4 @@ in Deno.
 De reden hiervoor is dat je de admin key nodig hebt en die mag niet in de client side code staan. 
 Ik wil je hier mee helpen aangezien edge functions buiten de scope van de cursus vallen. 
 
-**Ik mis de screenshots/prototypes nog.**
-
-Score: 1.5/2
+Score: 2/2
