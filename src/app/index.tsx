@@ -1,20 +1,31 @@
-import {FunctionComponent} from 'react'
-import {View, StyleSheet, Text} from 'react-native'
+import 'react-native-url-polyfill/auto'
 
-const Index: FunctionComponent = () => {
+import {Session} from '@supabase/supabase-js'
+import {useState, useEffect} from 'react'
+import {View, Text} from 'react-native'
+
+import {supabase} from '../lib/supabase'
+
+import Account from '@/components/Account'
+import Auth from '@/components/Auth'
+
+export default function App() {
+    const [session, setSession] = useState<Session | null>(null)
+
+    useEffect(() => {
+        supabase.auth.getSession().then(({data: {session}}) => {
+            setSession(session)
+        })
+
+        supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session)
+        })
+    }, [])
+
     return (
-        <View style={[styles.centered]}>
-            <Text>Project Mobile Development</Text>
+        <View>
+            <Auth />
+            {session && session.user && <Text>{session.user.id}</Text>}
         </View>
     )
 }
-
-const styles = StyleSheet.create({
-    centered: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-})
-
-export default Index

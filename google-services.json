@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "201848174676",
+    "project_id": "fitandgo-ea187",
+    "storage_bucket": "fitandgo-ea187.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:201848174676:android:1f842315578685997795c1",
+        "android_client_info": {
+          "package_name": "com.brentcools_r903754"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "201848174676-7dd5dqhstqb7jb86vqn1d4t08n9th59a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.brentcools_r903754",
+            "certificate_hash": "6c33a0a5a1e2697f66b09517b652ccdc07d5a93f"
+          }
+        },
+        {
+          "client_id": "201848174676-cbe6tcm4i6pe7dkhr8426pev08llaeal.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.brentcools_r903754",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "201848174676-ei33lkffjqklsmag0m3kn033o2bcddob.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0bpczCSfppfAqmooJcTjgzwv5IXKktKU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "201848174676-ei33lkffjqklsmag0m3kn033o2bcddob.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
