@@ -10,7 +10,7 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_FIREBASE_WEB_ID": "201848174676-7dd5dqhstqb7jb86vqn1d4t08n9th59a.apps.googleusercontent.com"
+        "EXPO_PUBLIC_FIREBASE_WEB_ID": "201848174676-ei33lkffjqklsmag0m3kn033o2bcddob.apps.googleusercontent.com"
       }
     },
     "production": {}
