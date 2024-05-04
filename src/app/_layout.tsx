@@ -71,23 +71,15 @@ const RootLayout: FunctionComponent = () => {
         <Stack>
             <Stack.Screen
                 name="index"
-                options={{title: 'Login'}}
+                options={{headerTitle: 'Login'}}
             />
             <Stack.Screen
-                name="home/index"
-                options={{title: 'Home'}}
+                name="home"
+                options={{headerTitle: 'Home', headerShown: false}}
             />
             <Stack.Screen
-                name="gerecht"
-                options={{title: 'Gerechten'}}
-            />
-            <Stack.Screen
-                name="kalender"
-                options={{title: 'Kalender'}}
-            />
-            <Stack.Screen
-                name="profiel/index"
-                options={{title: 'Profiel'}}
+                name="login/login"
+                options={{headerTitle: 'Login'}}
             />
         </Stack>
     )
