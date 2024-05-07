@@ -1,7 +1,6 @@
-import {useAssets} from 'expo-asset'
 import {Redirect} from 'expo-router'
 import {FunctionComponent} from 'react'
-import {Image, StyleSheet, View} from 'react-native'
+import {StyleSheet, View} from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import {Button} from 'react-native-paper'
 
@@ -16,10 +15,10 @@ const Login: FunctionComponent = () => {
     /*const localUri = assets?.at(0)?.localUri
     if (!localUri) {
         return <></>
-    }
+    }*/
     if (user) {
         return <Redirect href="/home/" />
-    }*/
+    }
 
     return (
         <LinearGradient
