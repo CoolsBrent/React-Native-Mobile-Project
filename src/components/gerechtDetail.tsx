@@ -106,12 +106,12 @@ const GerechtDetail: FunctionComponent<GerechtDetailProps> = ({type, naam, fotoU
             </View>
 
             <TouchableOpacity
-                style={styles.button}
+                style={styles.buttonVerwijderen}
                 onPress={handleDelete}>
                 <Text style={styles.buttonText}>Verwijderen</Text>
             </TouchableOpacity>
             <TouchableOpacity
-                style={styles.button}
+                style={styles.buttonTerug}
                 onPress={() => navigation.goBack()}>
                 <Text style={styles.buttonText}>Terug</Text>
             </TouchableOpacity>
@@ -132,8 +132,16 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         margin: 10,
     },
-    button: {
+    buttonTerug: {
         backgroundColor: '#30702c',
+        padding: 10,
+        width: '50%',
+        borderRadius: 5,
+        alignItems: 'center',
+        margin: 10,
+    },
+    buttonVerwijderen: {
+        backgroundColor: '#af0707',
         padding: 10,
         width: '50%',
         borderRadius: 5,
@@ -143,6 +151,7 @@ const styles = StyleSheet.create({
     buttonText: {
         color: 'white',
         fontSize: 16,
+        fontWeight: 'bold',
     },
     image: {
         width: 300,

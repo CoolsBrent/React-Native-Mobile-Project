@@ -82,7 +82,9 @@ const Home: FunctionComponent<HomeProps> = ({type, id}) => {
                 />
                 <PaperButton
                     style={styles.button}
-                    onPress={openModal}>
+                    labelStyle={{color: 'white', fontWeight: 'bold', fontSize: 16, width: 100}}
+                    onPress={openModal}
+                    mode="text">
                     Add Dish
                 </PaperButton>
             </View>
@@ -190,7 +192,8 @@ const styles = StyleSheet.create({
     },
     button: {
         marginTop: 60,
-        alignSelf: 'flex-start', // Voeg hier de marginTop toe
+        alignSelf: 'flex-start',
+        backgroundColor: '#30702c',
     },
     dropDown: {
         marginTop: 40,
