@@ -77,9 +77,10 @@ const RootLayout: FunctionComponent = () => {
                 name="home"
                 options={{headerTitle: 'Home', headerShown: false}}
             />
+
             <Stack.Screen
                 name="login/login"
-                options={{headerTitle: 'Login'}}
+                options={{headerTitle: 'Login', headerStyle: {backgroundColor: '#30702c'}}}
             />
         </Stack>
     )

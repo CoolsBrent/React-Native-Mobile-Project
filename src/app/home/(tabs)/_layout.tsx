@@ -1,5 +1,6 @@
 import {Tabs} from 'expo-router'
 import {FunctionComponent} from 'react'
+import {backgroundColor} from 'react-native-calendars/src/style'
 import {Icon, useTheme} from 'react-native-paper'
 
 const TaskLayout: FunctionComponent = () => {
@@ -15,6 +16,7 @@ const TaskLayout: FunctionComponent = () => {
                 tabBarActiveTintColor: theme.colors.primary,
                 tabBarInactiveTintColor: theme.colors.onSurface,
                 headerShown: true,
+                tabBarStyle: {backgroundColor: '#30702c'},
             }}>
             <Tabs.Screen
                 name="kalender"

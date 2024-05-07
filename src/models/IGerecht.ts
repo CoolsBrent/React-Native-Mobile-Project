@@ -1,8 +1,8 @@
 export interface IGerecht {
     id?: string
-    ingredienten: string[]
+    ingredienten: string
     fotoUrl: string
     naam: string
-    stappenPlan: string[]
+    stappenPlan: string
     type: string
 }

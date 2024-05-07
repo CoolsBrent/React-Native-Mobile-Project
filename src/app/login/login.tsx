@@ -1,30 +1,41 @@
+import {useAssets} from 'expo-asset'
 import {Redirect} from 'expo-router'
 import {FunctionComponent} from 'react'
-import {StyleSheet, View} from 'react-native'
+import {Image, StyleSheet, View} from 'react-native'
+import LinearGradient from 'react-native-linear-gradient'
 import {Button} from 'react-native-paper'
 
 import {AuthProvider, useSignIn} from '@/api/auth'
 import useUser from '@/hooks/useUser'
+//import login from '~/images/login.jpg'
 
 const Login: FunctionComponent = () => {
     const {mutate: signInWithSocialAuth} = useSignIn()
     const user = useUser()
-
+    //const [assets] = useAssets([login])
+    /*const localUri = assets?.at(0)?.localUri
+    if (!localUri) {
+        return <></>
+    }
     if (user) {
         return <Redirect href="/home/" />
-    }
+    }*/
 
     return (
-        <View style={[styles.loginButtonContainer]}>
-            <Button
-                icon="google"
-                mode="outlined"
-                contentStyle={[styles.loginButtonContent]}
-                style={[styles.loginButton]}
-                onPress={() => signInWithSocialAuth({provider: AuthProvider.GOOGLE})}>
-                Login with Google
-            </Button>
-        </View>
+        <LinearGradient
+            colors={['#30702c', '#274425', '#171c17']}
+            style={styles.gradient}>
+            <View style={[styles.loginButtonContainer]}>
+                <Button
+                    icon="google"
+                    mode="outlined"
+                    contentStyle={[styles.loginButtonContent]}
+                    style={[styles.loginButton]}
+                    onPress={() => signInWithSocialAuth({provider: AuthProvider.GOOGLE})}>
+                    Login with Google
+                </Button>
+            </View>
+        </LinearGradient>
     )
 }
 
@@ -41,6 +52,9 @@ const styles = StyleSheet.create({
     loginButtonContent: {
         display: 'flex',
         justifyContent: 'flex-start',
+    },
+    gradient: {
+        flex: 1,
     },
 })
 
