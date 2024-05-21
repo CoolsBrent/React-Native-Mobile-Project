@@ -2,13 +2,15 @@ import storage from '@react-native-firebase/storage'
 import {router} from 'expo-router'
 import {FunctionComponent, useEffect, useState} from 'react'
 import {ImageBackground, StyleSheet, Text, TouchableOpacity} from 'react-native'
+import {useTheme} from 'react-native-paper'
 
 import {IGerecht} from '@/models/IGerecht'
 
 interface GerechtProps extends IGerecht {}
 
 const Gerecht: FunctionComponent<GerechtProps> = ({userId, type, naam, fotoUrl, id, ingredienten, stappenPlan}) => {
-    const [imageUrl, setImageUrl] = useState<string>('')
+    const [imageUrl, setImageUrl] = useState<string>(fotoUrl)
+    const {colors} = useTheme()
 
     useEffect(() => {
         fetchDownloadUrl()
@@ -46,10 +48,10 @@ const Gerecht: FunctionComponent<GerechtProps> = ({userId, type, naam, fotoUrl, 
                 key={fotoUrl}
                 source={{uri: imageUrl}}
                 style={[styles.gerecht, {borderRadius: 10}]}
-                imageStyle={{opacity: 0.5}}
+                imageStyle={{opacity: 0.6}}
                 resizeMode="cover">
-                <Text style={styles.text}>{type}</Text>
-                <Text style={styles.text}>{naam}</Text>
+                <Text style={[styles.text, {color: colors.onSurface}]}>{type}</Text>
+                <Text style={[styles.text, {color: colors.onSurface}]}>{naam}</Text>
             </ImageBackground>
         </TouchableOpacity>
     )

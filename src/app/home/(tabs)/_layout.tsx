@@ -3,7 +3,7 @@ import {FunctionComponent} from 'react'
 import {backgroundColor} from 'react-native-calendars/src/style'
 import {Icon, useTheme} from 'react-native-paper'
 
-const TaskLayout: FunctionComponent = () => {
+const Layout: FunctionComponent = () => {
     const theme = useTheme()
 
     return (
@@ -64,4 +64,4 @@ const TaskLayout: FunctionComponent = () => {
     )
 }
 
-export default TaskLayout
+export default Layout

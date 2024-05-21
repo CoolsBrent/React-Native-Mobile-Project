@@ -7,6 +7,7 @@ import React, {FunctionComponent, useEffect, useState} from 'react'
 import {Image, StyleSheet, Text, TouchableOpacity, View, Alert, Modal, TextInput, Animated} from 'react-native'
 import DropDownPicker from 'react-native-dropdown-picker'
 import {PanGestureHandler, PanGestureHandlerGestureEvent, State} from 'react-native-gesture-handler'
+import {useTheme} from 'react-native-paper'
 
 import ScrollView = Animated.ScrollView
 import {UpdateGerechtParams, useDeleteGerecht, useGetGerechtById, useUpdateGerecht} from '@/api/gerechten'
@@ -20,7 +21,7 @@ const GerechtDetail: FunctionComponent<GerechtDetailProps> = ({id: gerechtId}) =
     const navigation = useNavigation()
     const {mutate: deleteGerecht} = useDeleteGerecht()
     const {mutate: updateGerecht} = useUpdateGerecht() // Gebruik de update hook
-
+    const {colors} = useTheme()
     type GerechtDetailRouteParams = {
         type: string
         naam: string
@@ -30,18 +31,7 @@ const GerechtDetail: FunctionComponent<GerechtDetailProps> = ({id: gerechtId}) =
         stappenPlan: string
         userId: string
     }
-
     const route = useRoute<RouteProp<ParamListBase, 'GerechtDetail'>>()
-    const [imageUrl, setImageUrl] = useState<string>('')
-    const [modalVisible, setModalVisible] = useState(false)
-    const [newNaam, setNewNaam] = useState<string>('')
-    const [newType, setNewType] = useState<string>('Breakfast')
-    const [newIngredienten, setNewIngredienten] = useState<string>('')
-    const [newStappenPlan, setNewStappenPlan] = useState<string>('')
-    const [newFotoUrl, setNewFotoUrl] = useState<string>('')
-    const [errorMessages, setErrorMessages] = useState<string[]>([]) // Gebruik een array voor het opslaan van foutmeldingen
-    const [openDropdown, setOpenDropdown] = useState(false)
-    const [currentStepIndex, setCurrentStepIndex] = useState<number>(0)
 
     const {
         type: gerechtType,
@@ -51,6 +41,17 @@ const GerechtDetail: FunctionComponent<GerechtDetailProps> = ({id: gerechtId}) =
         stappenPlan,
         userId,
     } = route.params as GerechtDetailRouteParams
+    const [imageUrl, setImageUrl] = useState<string>(gerechtUrl)
+    const [modalVisible, setModalVisible] = useState(false)
+    const [newNaam, setNewNaam] = useState<string>(gerechtNaam)
+    const [newType, setNewType] = useState<string>(gerechtType)
+    const [newIngredienten, setNewIngredienten] = useState<string>(ingredienten)
+    const [newStappenPlan, setNewStappenPlan] = useState<string>(stappenPlan)
+    const [newFotoUrl, setNewFotoUrl] = useState<string>(gerechtUrl)
+    const [errorMessages, setErrorMessages] = useState<string[]>([]) // Gebruik een array voor het opslaan van foutmeldingen
+    const [openDropdown, setOpenDropdown] = useState(false)
+    const [currentStepIndex, setCurrentStepIndex] = useState<number>(0)
+
     const [completedSteps, setCompletedSteps] = useState<boolean[]>(Array(stappenPlan.split(',').length).fill(false))
 
     useEffect(() => {
@@ -201,20 +202,21 @@ const GerechtDetail: FunctionComponent<GerechtDetailProps> = ({id: gerechtId}) =
     return (
         <ScrollView>
             <View style={styles.container}>
-                <Text style={[styles.text, {marginTop: 50}]}>{gerechtType}</Text>
+                <Text style={[styles.text, {color: colors.onSurface, marginTop: 50}]}>{gerechtType}</Text>
+
                 <Image
                     source={{uri: imageUrl}}
                     style={styles.image}
                 />
-                <Text style={styles.text}>{gerechtNaam}</Text>
+                <Text style={[styles.text, {color: colors.onSurface}]}>{gerechtNaam}</Text>
 
                 <View style={styles.rowContainer}>
                     <View style={styles.column}>
-                        <Text style={styles.text}>Ingredients:</Text>
+                        <Text style={[styles.text, {color: colors.onSurface}]}>Ingredients:</Text>
                         {ingredienten.split(',').map((item, index) => (
                             <Text
                                 key={index}
-                                style={styles.text}>
+                                style={[styles.text, {color: colors.onSurface}]}>
                                 {item}
                             </Text>
                         ))}
@@ -223,11 +225,15 @@ const GerechtDetail: FunctionComponent<GerechtDetailProps> = ({id: gerechtId}) =
                         onGestureEvent={gestureHandler}
                         onHandlerStateChange={gestureHandler}>
                         <Animated.View style={styles.column}>
-                            <Text style={styles.text}>Steps:</Text>
+                            <Text style={[styles.text, {color: colors.onSurface}]}>Steps:</Text>
                             {stappenPlan.split(',').map((item, index) => (
                                 <Text
                                     key={index}
-                                    style={[styles.text, completedSteps[index] && styles.completedStep]}>
+                                    style={[
+                                        styles.text,
+                                        completedSteps[index] && styles.completedStep,
+                                        {color: colors.onSurface},
+                                    ]}>
                                     {item}
                                 </Text>
                             ))}
