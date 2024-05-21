@@ -1,27 +1,34 @@
+import * as FileSystem from 'expo-file-system'
+import * as ImagePicker from 'expo-image-picker'
 import React, {FunctionComponent, useEffect, useState} from 'react'
-import {Animated, StyleSheet, Text, View, Modal, TextInput, Button} from 'react-native'
+import {Animated, StyleSheet, Text, View, Modal, TextInput, Button, TouchableOpacity, Image} from 'react-native'
 import DropDownPicker from 'react-native-dropdown-picker'
 import {Button as PaperButton} from 'react-native-paper'
 
+import ScrollView = Animated.ScrollView
 import {useAddGerecht, useGetGerechten} from '@/api/gerechten'
 import Gerecht from '@/components/gerecht'
+import useUser from '@/hooks/useUser'
 import {IGerecht} from '@/models/IGerecht'
-import ScrollView = Animated.ScrollView
+
+import storage from '@react-native-firebase/storage'
 
 interface HomeProps extends IGerecht {}
 
 const Home: FunctionComponent<HomeProps> = ({type, id}) => {
-    const {data: gerechten} = useGetGerechten()
+    const {data: gerechten, refetch: refetchGerechten} = useGetGerechten()
+    const user = useUser()
     const [modalVisible, setModalVisible] = useState(false)
     const [gerechtNaam, setGerechtNaam] = useState('')
     const [gerechtIngredienten, setGerechtIngredienten] = useState('')
     const [gerechtStappenPlan, setGerechtStappenPlan] = useState('')
-    const [gerechtType, setGerechtType] = useState('')
+    const [gerechtType, setGerechtType] = useState('Breakfast')
     const addGerechtMutation = useAddGerecht()
     const [openDropdown, setOpenDropdown] = useState(false)
     const [valueDropDown, setValueDropDown] = useState('Breakfast') // Verander de initiële waarde naar "Ontbijt"
     const [filteredGerechten, setFilteredGerechten] = useState<IGerecht[] | undefined>([])
-
+    const [errorMessages, setErrorMessages] = useState<string[]>([]) // Gebruik een array voor het opslaan van foutmeldingen
+    const [image, setImage] = useState('')
     const ontbijtGerechten = gerechten?.filter(gerecht => gerecht.type.toLowerCase() === 'breakfast')
     const lunchGerechten = gerechten?.filter(gerecht => gerecht.type.toLowerCase() === 'lunch')
     const dinerGerechten = gerechten?.filter(gerecht => gerecht.type.toLowerCase() === 'dinner')
@@ -34,35 +41,102 @@ const Home: FunctionComponent<HomeProps> = ({type, id}) => {
         } else if (valueDropDown === 'Dinner') {
             setFilteredGerechten(dinerGerechten)
         }
-    }, [valueDropDown]) // Verander de afhankelijkheid naar valueDropDown
+    }, [valueDropDown, gerechten]) // Verander de afhankelijkheid naar valueDropDown
 
     const openModal = () => {
         setModalVisible(true)
     }
 
-    const closeModal = () => {
+    const closeModal = async () => {
         setModalVisible(false)
+        await refetchGerechten()
     }
 
-    const handleAddGerecht = () => {
+    const handleAddGerecht = async () => {
         try {
-            addGerechtMutation.mutateAsync({
+            const errors: string[] = []
+
+            if (!gerechtNaam) {
+                errors.push('Fill in a name.')
+            }
+
+            if (!gerechtIngredienten) {
+                errors.push('Fill in ingredients.')
+            }
+            if (!gerechtStappenPlan) {
+                errors.push('Fill in steps.')
+            }
+            if (!gerechtType) {
+                errors.push('Select a type of dish.')
+            }
+
+            if (errors.length > 0) {
+                setErrorMessages(errors)
+                return
+            }
+            if (!user) {
+                // Voer geen acties uit als user null is
+                return
+            }
+
+            await addGerechtMutation.mutateAsync({
                 naam: gerechtNaam,
-                ingredienten: gerechtIngredienten.split(' ,'),
-                fotoUrl: 'url_van_de_afbeelding',
-                stappenPlan: gerechtStappenPlan.split(' ,'),
+                ingredienten: gerechtIngredienten.split(',').map(x => x.trim()),
+                fotoUrl: image,
+                stappenPlan: gerechtStappenPlan.split(',').map(x => x.trim()),
                 type: gerechtType,
+                userId: user.uid,
             })
-            closeModal()
+
+            await closeModal()
             setGerechtNaam('')
             setGerechtIngredienten('')
             setGerechtStappenPlan('')
             setGerechtType('')
+            setImage('')
         } catch (error) {
             console.error('Fout bij het toevoegen van het gerecht:', error)
         }
     }
 
+    const pickImage = async () => {
+        await ImagePicker.requestCameraPermissionsAsync()
+        const result = await ImagePicker.launchCameraAsync({
+            cameraType: ImagePicker.CameraType.front,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        })
+        if (!result.canceled) {
+            const uploadedImageUrl = await uploadImage(result.assets[0].uri)
+            setImage(uploadedImageUrl)
+            console.log('Uploaded Image URL:', uploadedImageUrl)
+        }
+    }
+
+    const uploadImage = async (imageUri: string) => {
+        try {
+            if (!imageUri) {
+                throw new Error('Image URI is null or undefined.')
+            }
+
+            const {uri} = await FileSystem.getInfoAsync(imageUri)
+            const storageRef = storage().ref()
+            const photoRef = storageRef.child('images/' + Date.now() + '.jpg')
+
+            const response = await fetch(uri)
+            const blob = await response.blob()
+
+            await photoRef.put(blob)
+
+            const downloadURL = await photoRef.getDownloadURL()
+            console.log('Downloadable Image URL:', downloadURL)
+            return downloadURL // Return the download URL of the uploaded image
+        } catch (error) {
+            console.error('Error uploading image:', error)
+            throw error // Propagate the error further up so it can be handled by the calling code
+        }
+    }
     return (
         <View>
             <View style={styles.dropdownContainer}>
@@ -74,7 +148,7 @@ const Home: FunctionComponent<HomeProps> = ({type, id}) => {
                         {label: 'Dinner', value: 'Dinner'},
                     ]}
                     containerStyle={{height: 40}}
-                    placeholder="Selecteer type gerecht"
+                    placeholder="Select type dish"
                     open={openDropdown}
                     setOpen={setOpenDropdown}
                     value={valueDropDown}
@@ -105,38 +179,64 @@ const Home: FunctionComponent<HomeProps> = ({type, id}) => {
                     visible={modalVisible}
                     onRequestClose={closeModal}>
                     <View style={styles.modalView}>
+                        <Text style={styles.modalText}>Add Dish</Text>
                         <TextInput
-                            placeholder="Naam van het gerecht"
+                            placeholder="Name of the dish"
                             value={gerechtNaam}
                             onChangeText={text => setGerechtNaam(text)}
                             style={styles.input}
                         />
                         <TextInput
-                            placeholder="Ingredienten (gescheiden door komma's)"
+                            placeholder="Ingredients (seperated by commas)"
                             value={gerechtIngredienten}
                             onChangeText={text => setGerechtIngredienten(text)}
                             style={styles.input}
                         />
                         <TextInput
-                            placeholder="Stappenplan (gescheiden door komma's)"
+                            placeholder="Steps (seperated by commas)"
                             value={gerechtStappenPlan}
                             onChangeText={text => setGerechtStappenPlan(text)}
                             style={styles.input}
                         />
-                        <TextInput
-                            placeholder="Type van het gerecht"
+                        <DropDownPicker
+                            items={[
+                                {label: 'Breakfast', value: 'Breakfast'},
+                                {label: 'Lunch', value: 'Lunch'},
+                                {label: 'Dinner', value: 'Dinner'},
+                            ]}
+                            containerStyle={{height: 80}}
+                            placeholder="Select type of dish"
+                            open={openDropdown}
+                            setOpen={setOpenDropdown}
                             value={gerechtType}
-                            onChangeText={text => setGerechtType(text)}
-                            style={styles.input}
+                            setValue={setGerechtType}
                         />
-                        <Button
-                            title="Toevoegen"
-                            onPress={handleAddGerecht}
+                        <Image
+                            source={{uri: image}}
+                            style={{width: 150, height: 150, borderRadius: 75}}
                         />
-                        <Button
-                            title="Annuleren"
+                        {errorMessages.map((errorMessage, index) => (
+                            <Text
+                                key={index}
+                                style={styles.errorMessage}>
+                                {errorMessage}
+                            </Text>
+                        ))}
+                        <TouchableOpacity
+                            onPress={pickImage}
+                            style={styles.buttonModalCamera}>
+                            <Text style={styles.buttonText}>Camera</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.buttonModalToevoegen}
+                            onPress={handleAddGerecht}>
+                            <Text style={styles.buttonText}>Add</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
                             onPress={closeModal}
-                        />
+                            style={styles.buttonModalAnnuleren}>
+                            <Text style={styles.buttonText}>Cancel</Text>
+                        </TouchableOpacity>
                     </View>
                 </Modal>
             </ScrollView>
@@ -164,6 +264,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         lineHeight: 50,
     },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0)',
+    },
     modalView: {
         margin: 20,
         backgroundColor: 'white',
@@ -179,12 +285,20 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5,
     },
+    modalText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        textAlign: 'center',
+    },
     input: {
-        height: 40,
-        width: '100%',
-        margin: 12,
-        borderWidth: 1,
-        padding: 10,
+        width: 300,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+        marginBottom: 15,
+        padding: 5,
+        fontSize: 16,
+        textAlign: 'left',
     },
     dropdownContainer: {
         paddingHorizontal: 20,
@@ -195,9 +309,42 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
         backgroundColor: '#30702c',
     },
+    buttonModalCamera: {
+        backgroundColor: '#30702c',
+        padding: 10,
+        width: '50%',
+        borderRadius: 5,
+        alignItems: 'center',
+        margin: 10,
+    },
+    buttonModalAnnuleren: {
+        backgroundColor: '#af0707',
+        padding: 10,
+        width: '50%',
+        borderRadius: 5,
+        alignItems: 'center',
+        margin: 10,
+    },
+    buttonModalToevoegen: {
+        backgroundColor: '#007bff',
+        padding: 10,
+        width: '50%',
+        borderRadius: 5,
+        alignItems: 'center',
+        margin: 10,
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
     dropDown: {
         marginTop: 40,
         marginBottom: 10, // Voeg hier de marginTop toe
+    },
+    errorMessage: {
+        color: 'red',
+        marginBottom: 10,
     },
 })
 

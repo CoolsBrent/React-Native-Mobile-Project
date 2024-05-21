@@ -4,9 +4,9 @@ import {FunctionComponent} from 'react'
 import GerechtDetail from '@/components/gerechtDetail'
 
 const GerechtDetail1: FunctionComponent = () => {
-    const {GerechtId} = useLocalSearchParams<{GerechtId: string}>()
+    const {gerechtId} = useLocalSearchParams<{gerechtId: string}>()
 
-    return <GerechtDetail id={GerechtId === '-1' ? undefined : GerechtId} />
+    return <GerechtDetail id={gerechtId === '-1' ? undefined : gerechtId} />
 }
 
 export default GerechtDetail1

@@ -22,12 +22,13 @@ const Login: FunctionComponent = () => {
 
     return (
         <LinearGradient
-            colors={['#30702c', '#274425', '#171c17']}
+            colors={['#274425', '#30702c']}
             style={styles.gradient}>
             <View style={[styles.loginButtonContainer]}>
                 <Button
                     icon="google"
                     mode="outlined"
+                    labelStyle={{color: 'white'}}
                     contentStyle={[styles.loginButtonContent]}
                     style={[styles.loginButton]}
                     onPress={() => signInWithSocialAuth({provider: AuthProvider.GOOGLE})}>
@@ -47,6 +48,7 @@ const styles = StyleSheet.create({
         width: '100%',
         marginVertical: 10,
         borderRadius: 0,
+        marginTop: 80,
     },
     loginButtonContent: {
         display: 'flex',
