@@ -1,19 +1,27 @@
 import firestore from '@react-native-firebase/firestore'
-import {useNavigation} from '@react-navigation/native' // Importeer useNavigation uit @react-navigation/native
-import {router} from 'expo-router'
+import {router, Link} from 'expo-router'
 import React, {FunctionComponent, useEffect, useState} from 'react'
 import {StyleSheet, Text, View, Modal, TouchableOpacity, Dimensions, FlatList, ActivityIndicator} from 'react-native'
 import {Calendar, DateData} from 'react-native-calendars'
 import RNPickerSelect from 'react-native-picker-select'
 
 import {useGetGerechten} from '@/api/gerechten'
-import gerechtId from '@/app/home/gerechtDetail/[gerechtId]'
 import {IGerecht} from '@/models/IGerecht'
+
 type MarkedDates = {
     [date: string]: {
         marked: boolean
         dotColor: string
     }
+}
+interface GerechtItem {
+    id?: string
+    ingredienten: string[]
+    fotoUrl: string
+    naam: string
+    stappenPlan: string[]
+    type: string
+    userId: string
 }
 interface KalenderProps extends IGerecht {}
 
@@ -22,10 +30,9 @@ const Kalender: FunctionComponent<KalenderProps> = ({userId, type, naam, fotoUrl
     const [modalVisible, setModalVisible] = useState<boolean>(false)
     const [selectedDish, setSelectedDish] = useState<string | null>(null)
     const [markedDates, setMarkedDates] = useState<MarkedDates>({})
-    const [dishes, setDishes] = useState<{[date: string]: string[]}>({})
+    const [dishes, setDishes] = useState<{[date: string]: GerechtItem[]}>({})
 
     const {data: gerechten, isLoading, error} = useGetGerechten()
-    const navigation = useNavigation()
 
     const handleDayPress = (date: DateData) => {
         const selectedDateString = date.dateString
@@ -33,7 +40,9 @@ const Kalender: FunctionComponent<KalenderProps> = ({userId, type, naam, fotoUrl
         console.log('Geselecteerde datum:', selectedDateString)
         setModalVisible(true) // Open het modale venster wanneer een dag wordt geselecteerd
     }
-
+    useEffect(() => {
+        console.log('Geselecteerde datum:', selectedDate)
+    }, [selectedDate])
     const handleAddDish = async () => {
         if (selectedDish) {
             console.log('Gerecht toegevoegd:', selectedDish, 'op', selectedDate)
@@ -42,33 +51,68 @@ const Kalender: FunctionComponent<KalenderProps> = ({userId, type, naam, fotoUrl
 
             setDishes(prevDishes => {
                 const updatedDishes = {...prevDishes}
+                const selectedGerecht = gerechten!.find(dish => dish.id === selectedDish)
                 if (updatedDishes[selectedDate]) {
-                    updatedDishes[selectedDate].push(selectedDish)
+                    updatedDishes[selectedDate].push(selectedGerecht as GerechtItem)
                 } else {
-                    updatedDishes[selectedDate] = [selectedDish]
+                    updatedDishes[selectedDate] = [selectedGerecht as GerechtItem]
                 }
                 return updatedDishes
             })
-            await firestore()
-                .collection('agenda')
-                .doc(selectedDate)
-                .set({
-                    dishes: dishes[selectedDate] ? [...dishes[selectedDate], selectedDish] : [selectedDish],
-                })
+
+            const selectedGerecht = gerechten!.find(dish => dish.id === selectedDish)
+
+            if (selectedGerecht) {
+                await firestore()
+                    .collection('agenda')
+                    .doc(selectedDate)
+                    .set({
+                        dishes: dishes[selectedDate]
+                            ? [
+                                  ...dishes[selectedDate],
+                                  {
+                                      id: selectedDish,
+                                      naam: selectedGerecht.naam,
+                                      ingredienten: selectedGerecht.ingredienten,
+                                      fotoUrl: selectedGerecht.fotoUrl,
+                                      stappenPlan: selectedGerecht.stappenPlan,
+                                      type: selectedGerecht.type,
+                                      userId: selectedGerecht.userId,
+                                  },
+                              ]
+                            : [
+                                  {
+                                      id: selectedDish,
+                                      naam: selectedGerecht.naam,
+                                      ingredienten: selectedGerecht.ingredienten,
+                                      fotoUrl: selectedGerecht.fotoUrl,
+                                      stappenPlan: selectedGerecht.stappenPlan,
+                                      type: selectedGerecht.type,
+                                      userId: selectedGerecht.userId,
+                                  },
+                              ],
+                    })
+            }
+
             setSelectedDish(null) // Reset de geselecteerde dish
             setModalVisible(false) // Sluit het modale venster na het toevoegen van het gerecht
         }
     }
 
     // Transformeer de gerechten naar het juiste formaat voor RNPickerSelect
-    const dishesList = gerechten?.map(dish => ({label: dish.naam, value: dish.naam})) || []
+    const dishesList = gerechten?.map(dish => ({label: dish.naam, value: dish.id})) || []
+
     useEffect(() => {
-        // Fetch marked dates and dishes from Firestore on component mount
         const fetchDatesAndDishes = async () => {
             const snapshot = await firestore().collection('agenda').get()
-            const datesAndDishes: {[date: string]: string[]} = {}
+            const datesAndDishes: {[date: string]: GerechtItem[]} = {}
             snapshot.forEach(doc => {
-                datesAndDishes[doc.id] = doc.data().dishes
+                // We maken een nieuwe array van GerechtItem-objecten van de gerechten die zijn opgeslagen in Firestore
+                const gerechtenArray: GerechtItem[] = doc.data().dishes.map((gerecht: {id: string, naam: string}) => ({
+                    id: gerecht.id,
+                    naam: gerecht.naam,
+                }))
+                datesAndDishes[doc.id] = gerechtenArray
             })
             setDishes(datesAndDishes)
             const marked = Object.keys(datesAndDishes).reduce((acc: MarkedDates, date: string) => {
@@ -79,6 +123,7 @@ const Kalender: FunctionComponent<KalenderProps> = ({userId, type, naam, fotoUrl
         }
         fetchDatesAndDishes()
     }, [])
+
     return (
         <View style={{flex: 1}}>
             <Calendar
@@ -103,25 +148,25 @@ const Kalender: FunctionComponent<KalenderProps> = ({userId, type, naam, fotoUrl
                         <Text style={styles.modalText}>Gerechten voor {selectedDate}</Text>
                         <FlatList
                             data={dishes[selectedDate] || []}
-                            keyExtractor={(item, index) => index.toString()}
-                            renderItem={({item}) => (
+                            keyExtractor={(item: GerechtItem, index) => index.toString()}
+                            renderItem={({item}: {item: GerechtItem}) => (
                                 <TouchableOpacity
                                     onPress={() => {
+                                        console.log(item.id)
                                         router.navigate({
-                                            pathname: '[gerechtId]',
+                                            pathname: `home/gerechtDetail/${item.id}`,
                                             // Navigeer naar de detailpagina van het gerecht
                                             params: {
-                                                gerechtId: id, // Stuur het gerechtId als parameter
-                                                type,
-                                                naam,
-                                                fotoUrl,
-                                                ingredienten,
-                                                stappenPlan,
-                                                userId,
+                                                naam: item.naam,
+                                                fotoUrl: item.fotoUrl,
+                                                type: item.type,
+                                                stappenPlan: item.stappenPlan,
+                                                ingredienten: item.ingredienten,
+                                                userId: item.userId, // Stuur het gerechtId als parameter
                                             },
                                         })
                                     }}>
-                                    <Text style={styles.listItem}>{item}</Text>
+                                    <Text style={styles.listItem}>{item.naam}</Text>
                                 </TouchableOpacity>
                             )}
                         />
@@ -226,4 +271,5 @@ const pickerSelectStyles = StyleSheet.create({
         width: 200,
     },
 })
+
 export default Kalender

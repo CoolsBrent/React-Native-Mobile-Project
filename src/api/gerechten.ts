@@ -91,7 +91,7 @@ export const useUpdateGerecht = (): UseMutationResult<IGerecht, Error, UpdateGer
         },
     })
 }
-export const useGetGerechtById = (gerechtId: string): UseQueryResult<IGerecht | undefined> => {
+export const useGetGerechtById = (gerechtId: string | undefined): UseQueryResult<IGerecht | undefined> => {
     return useQuery({
         queryKey: ['gerecht', gerechtId], // Definieer een unieke queryKey voor het gerecht
         queryFn: getGerechten,

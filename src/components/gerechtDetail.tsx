@@ -11,7 +11,6 @@ import {useTheme} from 'react-native-paper'
 
 import ScrollView = Animated.ScrollView
 import {UpdateGerechtParams, useDeleteGerecht, useGetGerechtById, useUpdateGerecht} from '@/api/gerechten'
-import {IGerecht} from '@/models/IGerecht'
 
 interface GerechtDetailProps {
     id?: string
@@ -22,6 +21,7 @@ const GerechtDetail: FunctionComponent<GerechtDetailProps> = ({id: gerechtId}) =
     const {mutate: deleteGerecht} = useDeleteGerecht()
     const {mutate: updateGerecht} = useUpdateGerecht() // Gebruik de update hook
     const {colors} = useTheme()
+
     type GerechtDetailRouteParams = {
         type: string
         naam: string
@@ -37,9 +37,9 @@ const GerechtDetail: FunctionComponent<GerechtDetailProps> = ({id: gerechtId}) =
         type: gerechtType,
         naam: gerechtNaam,
         fotoUrl: gerechtUrl,
-        ingredienten,
-        stappenPlan,
-        userId,
+        ingredienten = '',
+        stappenPlan = '',
+        userId = '',
     } = route.params as GerechtDetailRouteParams
     const [imageUrl, setImageUrl] = useState<string>(gerechtUrl)
     const [modalVisible, setModalVisible] = useState(false)
