@@ -21,6 +21,7 @@ const GerechtDetail: FunctionComponent<GerechtDetailProps> = ({id: gerechtId}) =
     const {mutate: deleteGerecht} = useDeleteGerecht()
     const {mutate: updateGerecht} = useUpdateGerecht() // Gebruik de update hook
     const {colors} = useTheme()
+    const {data} = useGetGerechtById(gerechtId!)
 
     type GerechtDetailRouteParams = {
         type: string

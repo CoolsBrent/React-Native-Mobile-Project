@@ -25,14 +25,14 @@ interface GerechtItem {
 }
 interface KalenderProps extends IGerecht {}
 
-const Kalender: FunctionComponent<KalenderProps> = ({userId, type, naam, fotoUrl, id, ingredienten, stappenPlan}) => {
+const Kalender: FunctionComponent<KalenderProps> = () => {
     const [selectedDate, setSelectedDate] = useState<string>('')
     const [modalVisible, setModalVisible] = useState<boolean>(false)
     const [selectedDish, setSelectedDish] = useState<string | null>(null)
     const [markedDates, setMarkedDates] = useState<MarkedDates>({})
     const [dishes, setDishes] = useState<{[date: string]: GerechtItem[]}>({})
 
-    const {data: gerechten, isLoading, error} = useGetGerechten()
+    const {data: gerechten, isLoading} = useGetGerechten()
 
     const handleDayPress = (date: DateData) => {
         const selectedDateString = date.dateString
@@ -108,9 +108,14 @@ const Kalender: FunctionComponent<KalenderProps> = ({userId, type, naam, fotoUrl
             const datesAndDishes: {[date: string]: GerechtItem[]} = {}
             snapshot.forEach(doc => {
                 // We maken een nieuwe array van GerechtItem-objecten van de gerechten die zijn opgeslagen in Firestore
-                const gerechtenArray: GerechtItem[] = doc.data().dishes.map((gerecht: {id: string, naam: string}) => ({
+                const gerechtenArray: GerechtItem[] = doc.data().dishes.map((gerecht: IGerecht) => ({
                     id: gerecht.id,
                     naam: gerecht.naam,
+                    ingredienten: gerecht.ingredienten,
+                    stappenPlan: gerecht.stappenPlan,
+                    type: gerecht.type,
+                    fotoUrl: gerecht.fotoUrl,
+                    userId: gerecht.userId,
                 }))
                 datesAndDishes[doc.id] = gerechtenArray
             })
@@ -165,6 +170,7 @@ const Kalender: FunctionComponent<KalenderProps> = ({userId, type, naam, fotoUrl
                                                 userId: item.userId, // Stuur het gerechtId als parameter
                                             },
                                         })
+                                        setModalVisible(false)
                                     }}>
                                     <Text style={styles.listItem}>{item.naam}</Text>
                                 </TouchableOpacity>

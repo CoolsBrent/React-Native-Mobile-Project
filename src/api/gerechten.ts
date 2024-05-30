@@ -104,6 +104,7 @@ export const useGetGerechtById = (gerechtId: string | undefined): UseQueryResult
  *                                          API functions
  * ---------------------------------------------------------------------------------------------------------------------
  */
+
 const getGerechten = async (): Promise<IGerecht[]> => {
     const querySnapshot = await getCollectionRef<IGerecht>('gerechten').get()
     return getDataFromQuerySnapshot(querySnapshot, 'id')

@@ -11,6 +11,9 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_FIREBASE_WEB_ID": "201848174676-ei33lkffjqklsmag0m3kn033o2bcddob.apps.googleusercontent.com"
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "production": {}
