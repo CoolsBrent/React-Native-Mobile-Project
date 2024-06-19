@@ -1,1 +1,2 @@
-APK url: https://expo.dev/accounts/brentcools/projects/project_mobile_development/builds/b12ccc7d-0a83-4427-8acb-a73635f4aabd
+1ste APK url: https://expo.dev/accounts/brentcools/projects/project_mobile_development/builds/b12ccc7d-0a83-4427-8acb-a73635f4aabd
+2de APK url: https://expo.dev/accounts/brentcools/projects/project_mobile_development/builds/69939631-e2cb-4356-995f-228d44d80860
